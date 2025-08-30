@@ -44,14 +44,27 @@ export const ordersApi = {
     limit?: number;
     search?: string;
   }): Promise<Order[]> => {
-    const response = await api.get('/admin/orders', { params });
-    return response.data.data || response.data;
+    try {
+      const response = await api.get('/admin/orders', { params });
+      console.log('API Response:', response.data); // Debug log
+      
+      // Based on your JSON response structure, orders are in response.data.orders
+      return response.data.orders || [];
+    } catch (error) {
+      console.error('getAllOrders API error:', error);
+      throw error;
+    }
   },
 
   // Get a single order by ID
   getOrderById: async (id: string): Promise<Order> => {
-    const response = await api.get(`/admin/order/${id}`);
-    return response.data.data || response.data;
+    try {
+      const response = await api.get(`/order/${id}`);
+      return response.data.order || response.data;
+    } catch (error) {
+      console.error('getOrderById API error:', error);
+      throw error;
+    }
   },
 
   // Update order status
@@ -62,20 +75,35 @@ export const ordersApi = {
       paymentStatus?: Order['paymentStatus']; 
     }
   ): Promise<{ success: boolean; message: string; data: Order }> => {
-    const response = await api.put(`/admin/order/${id}/status`, status);
-    return response.data;
+    try {
+      const response = await api.put(`/admin/order/${id}/status`, status);
+      return response.data;
+    } catch (error) {
+      console.error('updateOrderStatus API error:', error);
+      throw error;
+    }
   },
 
   // Update order details
   updateOrder: async (id: string, updateData: Partial<Order>): Promise<Order> => {
-    const response = await api.put(`/admin/order/${id}`, updateData);
-    return response.data.data || response.data;
+    try {
+      const response = await api.put(`/admin/order/${id}`, updateData);
+      return response.data.order || response.data;
+    } catch (error) {
+      console.error('updateOrder API error:', error);
+      throw error;
+    }
   },
 
   // Delete an order
   deleteOrder: async (id: string): Promise<{ success: boolean; message: string }> => {
-    const response = await api.delete(`/admin/order/${id}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/admin/order/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('deleteOrder API error:', error);
+      throw error;
+    }
   },
 
   // Get payment details for an order
@@ -87,8 +115,13 @@ export const ordersApi = {
     transactionId?: string;
     createdAt: string;
   }> => {
-    const response = await api.get(`/admin/order/${orderId}/payment`);
-    return response.data.data || response.data;
+    try {
+      const response = await api.get(`/order/${orderId}/payments`);
+      return response.data.payments || response.data;
+    } catch (error) {
+      console.error('getPaymentDetails API error:', error);
+      throw error;
+    }
   },
 
   // Get order statistics
@@ -102,8 +135,13 @@ export const ordersApi = {
     ordersByStatus: Array<{ status: string; count: number }>;
     revenueByDay: Array<{ date: string; revenue: number }>;
   }> => {
-    const response = await api.get('/admin/orders/stats', { params });
-    return response.data.data || response.data;
+    try {
+      const response = await api.get('/admin/orders/stats', { params });
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('getOrderStats API error:', error);
+      throw error;
+    }
   },
 
   // Bulk update orders
@@ -114,11 +152,16 @@ export const ordersApi = {
       paymentStatus?: Order['paymentStatus']; 
     }
   ): Promise<{ success: boolean; message: string; updatedCount: number }> => {
-    const response = await api.put('/admin/orders/bulk-update', {
-      orderIds,
-      updates
-    });
-    return response.data;
+    try {
+      const response = await api.put('/admin/orders/bulk-update', {
+        orderIds,
+        updates
+      });
+      return response.data;
+    } catch (error) {
+      console.error('bulkUpdateOrders API error:', error);
+      throw error;
+    }
   },
 
   // Export orders to CSV
@@ -128,10 +171,15 @@ export const ordersApi = {
     endDate?: string;
     format?: 'csv' | 'excel';
   }): Promise<Blob> => {
-    const response = await api.get('/admin/orders/export', {
-      params,
-      responseType: 'blob'
-    });
-    return response.data;
+    try {
+      const response = await api.get('/admin/orders/export', {
+        params,
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('exportOrders API error:', error);
+      throw error;
+    }
   }
 };

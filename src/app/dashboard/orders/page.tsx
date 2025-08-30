@@ -36,12 +36,31 @@ export default function OrdersPage() {
       try {
         setError(null);
         setLoading(true);
+        
+        console.log('Fetching orders...'); // Debug log
         const data = await ordersApi.getAllOrders();
-        // Ensure data is an array, fallback to empty array if not
-        setOrders(Array.isArray(data) ? data : []);
-      } catch (error) {
+        console.log('Orders received:', data); // Debug log
+        
+        // Add more defensive checks
+        if (!data) {
+          console.warn('No data received from API');
+          setOrders([]);
+          return;
+        }
+        
+        if (!Array.isArray(data)) {
+          console.warn('Data is not an array:', typeof data, data);
+          setOrders([]);
+          return;
+        }
+        
+        console.log('Setting orders:', data); // Debug log
+        setOrders(data);
+        
+      } catch (error: any) {
         console.error('Error fetching orders:', error);
-        setError('Failed to fetch orders. Please try again.');
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch orders. Please try again.';
+        setError(errorMessage);
         setOrders([]); // Ensure orders is always an array
       } finally {
         setLoading(false);
@@ -52,11 +71,20 @@ export default function OrdersPage() {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    if (!Array.isArray(orders)) return [];
-    return orders.filter(order => {
+    console.log('Filtering orders, current orders:', orders); // Debug log
+    
+    if (!Array.isArray(orders)) {
+      console.warn('Orders is not an array in filter:', orders);
+      return [];
+    }
+    
+    const filtered = orders.filter(order => {
       if (filter === 'all') return true;
-      return order.deliveryStatus.toLowerCase() === filter;
+      return order.deliveryStatus?.toLowerCase() === filter;
     });
+    
+    console.log('Filtered orders:', filtered); // Debug log
+    return filtered;
   }, [orders, filter]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
@@ -76,9 +104,10 @@ export default function OrdersPage() {
             : order
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating order status:', error);
-      setError('Failed to update order status. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update order status. Please try again.';
+      setError(errorMessage);
     }
   };
 
@@ -123,7 +152,13 @@ export default function OrdersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Order List ({filteredOrders.length})</CardTitle>
+          <CardTitle>
+            Order List ({filteredOrders.length})
+            {/* Debug info */}
+            <span className="text-sm text-gray-500 ml-2">
+              (Total: {orders.length}, Filtered: {filteredOrders.length})
+            </span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -192,7 +227,7 @@ export default function OrdersPage() {
               {filteredOrders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    No orders found
+                    {orders.length === 0 ? 'No orders found' : `No orders match the "${filter}" filter`}
                   </TableCell>
                 </TableRow>
               )}
@@ -200,6 +235,22 @@ export default function OrdersPage() {
           </Table>
         </CardContent>
       </Card>
+      
+      {/* Debug info - Remove this in production
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="text-sm">Debug Info</CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs">
+            <p>Orders length: {orders.length}</p>
+            <p>Filtered orders length: {filteredOrders.length}</p>
+            <p>Current filter: {filter}</p>
+            <p>Orders is array: {Array.isArray(orders) ? 'Yes' : 'No'}</p>
+            <p>First order: {orders[0] ? JSON.stringify(orders[0], null, 2) : 'None'}</p>
+          </CardContent>
+        </Card>
+      )} */}
     </div>
   );
 }
