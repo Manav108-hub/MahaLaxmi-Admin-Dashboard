@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  // { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  // { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
   { name: 'Products', href: '/dashboard/products', icon: Package },
   { name: 'Users', href: '/dashboard/users', icon: Users },
